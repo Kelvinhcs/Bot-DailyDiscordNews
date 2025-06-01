@@ -226,4 +226,29 @@ async def veja(interaction:discord.Interaction):
     except Exception as e:
         await interaction.followup.send(f"❌ Error: {str(e)}")
 
+@bot.tree.command(name="uol", description="Receba as principais notícias da página inicial do site UOL")
+async def uol(interaction:discord.Interaction):
+    await interaction.response.defer()
+    try:
+        color_hex = '#ff8100'
+        discord_color = int(color_hex[1:], 16)
+        embed = discord.Embed(title="Uol", url='https://www.uol.com.br/', color=discord_color)
+        embed.set_author(name="Repositório oficial no github", url='https://github.com/Kelvinhcs/BotNews')
+        embed.set_thumbnail(url="https://upload.wikimedia.org/wikipedia/commons/b/bd/UOL_logo.png")
+
+        uolUrl = requests.get(url="https://www.uol.com.br/")
+        uolSoup = BeautifulSoup(uolUrl.content, 'html5lib')
+        titulos = uolSoup.find_all('h3', class_='title__element')
+
+        for index, item in enumerate(titulos, start=1):
+            if index > 9:
+                break
+            else:
+                embed.add_field(name=f"{index} - **{item.get_text(strip=True)}**",
+                                value=f"{item.find_parent('a')['href']}")
+        await interaction.followup.send(embed=embed)
+    except Exception as e:
+        await interaction.followup.send(f"❌ Error: {str(e)}")
+
+
 bot.run(token)
