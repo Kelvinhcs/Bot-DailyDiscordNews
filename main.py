@@ -12,7 +12,18 @@ token = getenv('DISCORD_BOT_TOKEN')
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix='$', intents=intents)
-
+headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+    'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7',
+    'Accept-Encoding': 'gzip, deflate, br',
+    'Connection': 'keep-alive',
+    'Referer': 'https://www.google.com/',
+    'Sec-Fetch-Dest': 'document',
+    'Sec-Fetch-Mode': 'navigate',
+    'Sec-Fetch-Site': 'cross-site',
+    'Sec-Fetch-User': '?1',
+    'Upgrade-Insecure-Requests': '1',
+    'DNT': '1',}
 
 @bot.event
 async def on_ready():
@@ -27,27 +38,13 @@ async def on_ready():
 async def valor(interaction:discord.Interaction):
     await interaction.response.defer()
     try:
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-            'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Connection': 'keep-alive',
-            'Referer': 'https://www.google.com/',
-            'Sec-Fetch-Dest': 'document',
-            'Sec-Fetch-Mode': 'navigate',
-            'Sec-Fetch-Site': 'cross-site',
-            'Sec-Fetch-User': '?1',
-            'Upgrade-Insecure-Requests': '1',
-            'DNT': '1',
-        }
         color_hex = "#016667"
         discord_color = int(color_hex[1:], 16)
         embed = discord.Embed(title="Valor Econômico", url='https://valor.globo.com/', color=discord_color)
         embed.set_author(name="Repositório oficial no github", url='https://github.com/Kelvinhcs/BotNews')
         embed.set_thumbnail(url="https://s3.glbimg.com/v1/AUTH_1b264e8ce06649ae85acee5d38e32f34/images/novo_logo_valor_economico.png")
 
-        valorUrl = requests.get(url="https://valor.globo.com/")
+        valorUrl = requests.get(url="https://valor.globo.com/", headers=headers)
         soupValor = BeautifulSoup(valorUrl.content, 'html5lib')
         allBlocks = soupValor.find_all('div', class_="highlight__content")
         ibovespaPercentage = soupValor.find(class_="valor-data-chart__head__variation")
@@ -103,20 +100,6 @@ async def valor(interaction:discord.Interaction):
 async def g1(interaction:discord.Interaction):
     await interaction.response.defer()
     try:
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-            'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Connection': 'keep-alive',
-            'Referer': 'https://www.google.com/',
-            'Sec-Fetch-Dest': 'document',
-            'Sec-Fetch-Mode': 'navigate',
-            'Sec-Fetch-Site': 'cross-site',
-            'Sec-Fetch-User': '?1',
-            'Upgrade-Insecure-Requests': '1',
-            'DNT': '1',
-        }
         color_hex = '#c2170a'
         discord_color = int(color_hex[1:], 16)
         embed = discord.Embed(title="G1", url='https://g1.globo.com/', color=discord_color)
@@ -145,21 +128,7 @@ async def g1(interaction:discord.Interaction):
 async def estadao(interaction:discord.Interaction):
     await interaction.response.defer()
     try:
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-            'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Connection': 'keep-alive',
-            'Referer': 'https://www.google.com/',
-            'Sec-Fetch-Dest': 'document',
-            'Sec-Fetch-Mode': 'navigate',
-            'Sec-Fetch-Site': 'cross-site',
-            'Sec-Fetch-User': '?1',
-            'Upgrade-Insecure-Requests': '1',
-            'DNT': '1', }
-
-        estadaoUrl = requests.get(url="https://www.estadao.com.br/")
+        estadaoUrl = requests.get(url="https://www.estadao.com.br/", headers=headers)
         estadaoSoup = BeautifulSoup(estadaoUrl.content, 'html5lib')
         headlines = estadaoSoup.find_all(class_="headline")
 
