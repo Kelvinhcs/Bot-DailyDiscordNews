@@ -201,5 +201,29 @@ async def oglobo(interaction:discord.Interaction):
     except Exception as e:
         await interaction.followup.send(f"❌ Error: {str(e)}")
 
+@bot.tree.command(name="veja", description="Receba as principais notícias da página inicial do site Veja")
+async def veja(interaction:discord.Interaction):
+    await interaction.response.defer()
+    try:
+        color_hex = '#af0f08'
+        discord_color = int(color_hex[1:], 16)
+        embed = discord.Embed(title="Veja", url='https://veja.abril.com.br/', color=discord_color)
+        embed.set_author(name="Repositório oficial no github", url='https://github.com/Kelvinhcs/BotNews')
+        embed.set_thumbnail(url="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ0CXVHrn1kc_dh1MQZKi-4RYds3pVmQZdN2g&s")
+
+        vejaUrl = requests.get(url="https://veja.abril.com.br/")
+        vejaSoup = BeautifulSoup(vejaUrl.content, 'html5lib')
+        titulos = vejaSoup.find_all(class_='title')
+
+        for index, item in enumerate(titulos, start=1):
+            if index > 9 or item.get_text(strip=True) == 'Continua após publicidade':
+                break
+            else:
+                embed.add_field(name=f"{index} - **{item.get_text(strip=True)}**",
+                                value=f"{item.find_parent('a')['href']}")
+
+        await interaction.followup.send(embed=embed)
+    except Exception as e:
+        await interaction.followup.send(f"❌ Error: {str(e)}")
 
 bot.run(token)
