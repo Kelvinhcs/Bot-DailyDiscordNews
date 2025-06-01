@@ -23,7 +23,6 @@ async def on_ready():
         print(f"Falha ao sincronizar os comandos: {e}")
     print(f'Iniciado e logado como: {bot.user}')
 
-
 @bot.tree.command(name="valor", description="Receba as principais notícias da página inicial do site Valor econômico")
 async def valor(interaction:discord.Interaction):
     await interaction.response.defer()
@@ -100,7 +99,6 @@ async def valor(interaction:discord.Interaction):
     except Exception as e:
         await interaction.followup.send(f"❌ Error: {str(e)}")
 
-
 @bot.tree.command(name="g1", description="Receba as top 6 notícias da página inicial do site G1")
 async def g1(interaction:discord.Interaction):
     await interaction.response.defer()
@@ -143,6 +141,48 @@ async def g1(interaction:discord.Interaction):
     except Exception as e:
         await interaction.followup.send(f"❌ Error: {str(e)}")
 
+@bot.tree.command(name='estadao', description="Receba as principais notícias da página inicial do site Estadão")
+async def estadao(interaction:discord.Interaction):
+    await interaction.response.defer()
+    try:
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+            'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Connection': 'keep-alive',
+            'Referer': 'https://www.google.com/',
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'cross-site',
+            'Sec-Fetch-User': '?1',
+            'Upgrade-Insecure-Requests': '1',
+            'DNT': '1', }
 
+        estadaoUrl = requests.get(url="https://www.estadao.com.br/")
+        estadaoSoup = BeautifulSoup(estadaoUrl.content, 'html5lib')
+        headlines = estadaoSoup.find_all(class_="headline")
+
+        color_hex = '#0076ec'
+        discord_color = int(color_hex[1:], 16)
+        embed = discord.Embed(title="Estadao", url='https://www.estadao.com.br/', color=discord_color)
+        embed.set_author(name="Repositório oficial no github", url='https://github.com/Kelvinhcs/BotNews')
+        embed.set_thumbnail(url="https://statics.estadao.com.br/s2016/portal/logos/metadados/estadao_1x1.png")
+
+        for index, item in enumerate(headlines, start=1):
+            if index > 6:
+                break
+            else:
+                if item.find('a'):
+                    link = item.find('a')['href']
+                    embed.add_field(name=f"{index} - **{item.get_text(strip=True)}**", value=f'{link}', inline=True)
+                else:
+                    if item.find_parent('a'):
+                        link = item.find_parent('a')['href']
+                        embed.add_field(name=f"{index} - **{item.get_text(strip=True)}**", value=f'{link}', inline=True)
+        await interaction.followup.send(embed=embed)
+
+    except Exception as e:
+        await interaction.followup.send(f"❌ Error: {str(e)}")
 
 bot.run(token)
