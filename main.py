@@ -154,4 +154,52 @@ async def estadao(interaction:discord.Interaction):
     except Exception as e:
         await interaction.followup.send(f"❌ Error: {str(e)}")
 
+@bot.tree.command(name="oglobo", description="Receba as principais notícias da página inicial do site O Globo")
+async def oglobo(interaction:discord.Interaction):
+    await interaction.response.defer()
+    try:
+        color_hex = '#014687'
+        discord_color = int(color_hex[1:], 16)
+        embed = discord.Embed(title="O Globo", url='https://oglobo.globo.com/', color=discord_color)
+        embed.set_author(name="Repositório oficial no github", url='https://github.com/Kelvinhcs/BotNews')
+        embed.set_thumbnail(url="https://d37iydjzbdkvr9.cloudfront.net/google-assistant/o-globo/logo-globo-1000x1000.jpg")
+
+
+        ogloboUrl = requests.get(url="https://oglobo.globo.com/", headers=headers)
+        ogloboSoup = BeautifulSoup(ogloboUrl.content, 'html5lib')
+        manchetes = ogloboSoup.find_all(class_="title")
+        bullets = ogloboSoup.find_all(class_="manchete_bullets__title_bullet")
+        titulos = ogloboSoup.find_all(class_="highlight__title")
+        index = 1
+
+
+        for item in manchetes:
+            if index > 9:
+                break
+            else:
+                embed.add_field(name=f"{index} - **{item.get_text(strip=True)}**",
+                                value=f"{item.find_parent('a')['href']}", inline=True)
+                index += 1
+
+        for item in bullets:
+            if index > 9:
+                break
+            else:
+                embed.add_field(name=f"{index} - **{item.get_text(strip=True)}**",
+                                value=f"{item.find_parent('a')['href']}", inline=True)
+                index += 1
+
+        for item in titulos:
+            if index > 9:
+                break
+            else:
+                embed.add_field(name=f"{index} - **{item.get_text(strip=True)}**",
+                                value=f"{item.find('a')['href']}", inline=True)
+                index += 1
+
+        await interaction.followup.send(embed=embed)
+    except Exception as e:
+        await interaction.followup.send(f"❌ Error: {str(e)}")
+
+
 bot.run(token)
