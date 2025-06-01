@@ -6,6 +6,7 @@ from os import getenv
 from dotenv import load_dotenv
 
 
+
 load_dotenv()
 token = getenv('DISCORD_BOT_TOKEN')
 intents = discord.Intents.default()
@@ -23,7 +24,7 @@ async def on_ready():
     print(f'Iniciado e logado como: {bot.user}')
 
 
-@bot.tree.command(name="valor", description="Receba as top 6 notícias da página inicial do site Valor econômico")
+@bot.tree.command(name="valor", description="Receba as principais notícias da página inicial do site Valor econômico")
 async def valor(interaction:discord.Interaction):
     await interaction.response.defer()
     try:
@@ -50,12 +51,40 @@ async def valor(interaction:discord.Interaction):
         valorUrl = requests.get(url="https://valor.globo.com/")
         soupValor = BeautifulSoup(valorUrl.content, 'html5lib')
         allBlocks = soupValor.find_all('div', class_="highlight__content")
+        ibovespaPercentage = soupValor.find(class_="valor-data-chart__head__variation")
+        ibovespaPoints = soupValor.find(class_="valor-data-chart__head__points")
+        tabelas = soupValor.find(class_="section-data__table")
         index = 1
+
         for block in allBlocks:
+            #if we pass the 6th news start making the footer
+            #"why you just don't use footer on the embed?" because the code is mine
             if index > 6:
+                if ibovespaPercentage.get_text(strip=True).startswith('-'):
+                    embed.add_field(name=f"Porcentagem Ibovespa: 🔻📉 **{ibovespaPercentage.get_text(strip=True)}** 🔻📉",
+                                    value=f"Pontos: **{ibovespaPoints.get_text(strip=True)}**")
+                else:
+                    embed.add_field(name=f"Porcentagem Ibovespa: 📈✅ **{ibovespaPercentage.get_text(strip=True)}** ✅📈",
+                                    value=f"Pontos: **{ibovespaPoints.get_text(strip=True)}**")
+
+                #get all the Currency Exchange and just show the comercial values
+                for row in tabelas.find_all('tr'):
+                    if index == 7: #ignore the first table row that only have things we alredy got before
+                        index += 1
+                        pass
+                    elif index == 8 or index == 10: #only shows the important ones
+                        cells = row.find_all('td')
+                        moeda = cells[0].get_text(strip=True)
+                        compra = cells[1].get_text(strip=True)
+                        embed.add_field(name=f"**{moeda}**",
+                                        value=f"Valor de compra: **{compra}**",
+                                        inline=False)
+                        index += 1
+                    else:
+                        index += 1
                 break
             else:
-                try:
+                try: #Get all the main news
                     title = block.find('h2', class_='highlight__title')
                     aTag = block.find('a')
                     link = aTag['href']
@@ -65,6 +94,7 @@ async def valor(interaction:discord.Interaction):
                     print(f"Alguma coisa deu errado: {e}")
                     index -= 1
                     pass
+
 
         await interaction.followup.send(embed=embed)
     except Exception as e:
